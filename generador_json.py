@@ -55,4 +55,4 @@ salida = os.path.join(JSON_DIR, "revistas.json")
 with open(salida, "w", encoding="utf-8") as f:
     json.dump(revistas, f, indent=4, ensure_ascii=False)
 
-print(f"✅ JSON generado con éxito en: {salida}")
+print(f" JSON generado con éxito en: {salida}")
