@@ -4,6 +4,7 @@ from datetime import datetime
 import urllib.parse
 import time
 import json
+import argparse
 
 HEADERS = {
     "User-Agent": (
@@ -30,10 +31,7 @@ def generar_entrada_vacia(titulo, url="No encontrado"):
 
 def obtener_info_scimago(titulo):
     q = urllib.parse.quote_plus(titulo)
-    search_url = (
-        "https://www.scimagojr.com/journalsearch.php"
-        f"?clean=0&tip=sid&q={q}"
-    )
+    search_url = f"https://www.scimagojr.com/journalsearch.php?clean=0&tip=sid&q={q}"
     
     try:
         r = requests.get(search_url, headers=HEADERS, timeout=10)
@@ -68,12 +66,11 @@ def obtener_info_scimago(titulo):
     desc = jsoup.select_one(".journaldescription")
     descripcion = desc.text.strip() if desc else "No disponible"
 
-        # Obtener URL del widget
+    # Obtener URL del widget
     widget_url = "No disponible"
     img_tag = jsoup.find("img", src=lambda x: x and "journal_img.php" in x)
     if img_tag:
         widget_url = urllib.parse.urljoin(journal_url, img_tag["src"])
-
 
     def extraer(label):
         nodo = jsoup.find(text=label)
@@ -110,24 +107,35 @@ def es_entrada_vacia(info):
     campos = ["descripcion", "sjr", "h_index", "subject_area", "publisher", "issn", "publication_type"]
     return all(info[campo] == "No disponible" for campo in campos)
 
-def procesar_revistas(titulos):
-    resultado = []
-    for i, titulo in enumerate(titulos):
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-a", "--archivo", required=True, help="Archivo de entrada JSON")
+    parser.add_argument("-p", "--posicion_inicio", type=int, default=0)
+    parser.add_argument("-u", "--posicion_final", type=int, default=0)
+    parser.add_argument("-o", "--output", required=True, help="Archivo de salida JSON")
+    args = parser.parse_args()
+
+    with open(args.archivo, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    titulos_lista = list(data.keys())
+    resultados = []
+
+    for i in range(args.posicion_inicio, min(args.posicion_final + 1, len(titulos_lista))):
+        titulo = titulos_lista[i]
         print(f"[{i}] Procesando: {titulo}")
         info = obtener_info_scimago(titulo)
         if info and not es_entrada_vacia(info):
-            resultado.append(info)
-        time.sleep(1)  # 1  segundos entre cada petición
+            resultados.append(info)
+        time.sleep(1)
 
-    salida = "json/salida.json"
-    with open(salida, "w", encoding="utf-8") as f:
-        json.dump(resultado, f, indent=4, ensure_ascii=False)
+    # Filtrar campos si quieres solo la URL del widget
+    for r in resultados:
+        if r["widget"] == "No disponible":
+            r.pop("widget", None)
 
-# Lista de títulos
-titulos_revistas = [
-    "2D MATERIALS", "3 BIOTECH", "AAC: AUGMENTATIVE AND ALTERNATIVE COMMUNICATION",
-    "AACL BIOFLUX", "AACN ADVANCED CRITICAL CARE", "AANA JOURNAL",
-    "AAO JOURNAL", "AAOHN JOURNAL", "AAPS JOURNAL", "AAPS PHARMSCITECH"
-]
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(resultados, f, indent=4, ensure_ascii=False)
 
-procesar_revistas(titulos_revistas)
+if __name__ == "__main__":
+    main()
