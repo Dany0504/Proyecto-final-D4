@@ -5,49 +5,58 @@ from collections import defaultdict
 
 # Ruta base del proyecto
 BASE_DIR = r"C:\Users\dany0\Downloads\datos\datos"
-
-# Directorios de entrada
-AREAS_DIR = os.path.join(BASE_DIR, "csv", "areas")
-CATALOGOS_DIR = os.path.join(BASE_DIR, "csv", "catalogos")
-
-# Directorio de salida
+CSV_DIR = os.path.join(BASE_DIR, "csv")
+CATALOGOS_DIR = os.path.join(CSV_DIR, "catalogos")
 JSON_DIR = os.path.join(BASE_DIR, "json")
 os.makedirs(JSON_DIR, exist_ok=True)
 
-# Diccionario para guardar datos
+# Diccionario final de revistas
 revistas = defaultdict(lambda: {"areas": [], "catalogos": []})
 
-# Leer archivos del directorio de áreas
-for archivo in os.listdir(AREAS_DIR):
-    if archivo.endswith(".csv"):
-        with open(os.path.join(AREAS_DIR, archivo), encoding='latin-1') as f:
-            reader = csv.reader(f)
-            next(reader)  # Saltar encabezado
-            for fila in reader:
-                if len(fila) <2:
-                    continue
-                titulo = fila[0].strip().lower()
-                area = fila[1].strip().upper()
-                if area not in revistas[titulo]["areas"]:
-                    revistas[titulo]["areas"].append(area)
+# Leer revistas desde archivos de área (csv dentro de 'csv')
+for archivo in os.listdir(CSV_DIR):
+    ruta = os.path.join(CSV_DIR, archivo)
 
-# Leer archivos del directorio de catálogos
+    if not archivo.endswith(".csv") or "catalogos" in archivo.lower():  # Ignorar carpetas de catálogos
+        continue
+
+    with open(ruta, encoding="latin-1") as f:
+        reader = csv.reader(f)
+        for fila in reader:
+            if not fila or not fila[0].strip():
+                continue
+            # El título es la primera columna y el área es el nombre del archivo sin " RadGridExport.csv"
+            titulo = fila[0].strip()  
+            area = archivo.replace(" RadGridExport.csv", "").strip()  # Aquí se obtiene el área
+            if area not in revistas[titulo]["areas"]:
+                revistas[titulo]["areas"].append(area)
+
+            # Depuración: Imprimir el título y el área
+            print(f"Revista: '{titulo}' | Área: '{area}'")
+
+# Leer revistas desde archivos de catálogo (csv dentro de 'csv/catalogos')
 for archivo in os.listdir(CATALOGOS_DIR):
-    if archivo.endswith(".csv"):
-        with open(os.path.join(CATALOGOS_DIR, archivo), encoding='latin-1') as f:
-            reader = csv.reader(f)
-            next(reader)  # Saltar encabezado
-            for fila in reader:
-                if len(fila) <2:
-                    continue
-                titulo = fila[0].strip().lower()
-                catalogo = fila[1].strip().upper()
-                if catalogo not in revistas[titulo]["catalogos"]:
-                    revistas[titulo]["catalogos"].append(catalogo)
+    ruta = os.path.join(CATALOGOS_DIR, archivo)
 
-# Guardar como JSON
-salida_path = os.path.join(JSON_DIR, "revistas.json")
-with open(salida_path, "w", encoding="latin-1") as f:
+    if not archivo.endswith(".csv"):
+        continue
+
+    # Extraemos solo el nombre del catálogo antes de "_RadGridExport.csv"
+    catalogo = archivo.replace("_RadGridExport.csv", "").strip()
+
+    with open(ruta, encoding="latin-1") as f:
+        reader = csv.reader(f)
+        for fila in reader:
+            if not fila or not fila[0].strip():
+                continue
+            # El título es la primera columna
+            titulo = fila[0].strip()  # Sin normalización, manteniendo el título tal cual
+            if catalogo not in revistas[titulo]["catalogos"]:
+                revistas[titulo]["catalogos"].append(catalogo)
+
+# Guardar resultado como JSON
+salida = os.path.join(JSON_DIR, "revistas.json")
+with open(salida, "w", encoding="utf-8") as f:
     json.dump(revistas, f, indent=4, ensure_ascii=False)
 
-print(f"Archivo JSON generado en: {salida_path}")
+print(f" JSON generado con éxito en: {salida}")
