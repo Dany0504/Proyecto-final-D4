@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Catálogos{% endblock %}
+{% block content %}
+<h2>Catálogos Disponibles</h2>
+<ul class="list-group">
+    {% for cat in catalogos %}
+    <li class="list-group-item">
+        <a href="/catalogo/{{ cat }}">{{ cat }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

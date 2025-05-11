@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Explorar{% endblock %}
+{% block content %}
+<h2>Explorar por letra</h2>
+<p>
+    {% for letra in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+    <a class="btn btn-outline-primary btn-sm" href="/explorar?letra={{ letra }}">{{ letra }}</a>
+    {% endfor %}
+</p>
+
+{% if letra %}
+<h3>Revistas que empiezan con '{{ letra }}'</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Catálogos</th>
+            <th>Áreas</th>
+            <th>H-Index</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for titulo, datos in revistas.items() %}
+        <tr>
+            <td><a href="/revista/{{ titulo }}">{{ titulo }}</a></td>
+            <td>
+                {% for c in datos.get('catalogos', []) %}
+                    <a href="/catalogo/{{ c }}">{{ c }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>
+                {% for a in datos.get('areas', []) %}
+                    <a href="/area/{{ a }}">{{ a }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ datos.get('H-Index', 'N/A') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

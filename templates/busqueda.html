@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Resultados de búsqueda{% endblock %}
+{% block content %}
+<h2>Resultados de búsqueda: "{{ query }}"</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Áreas</th>
+            <th>Catálogos</th>
+            <th>H-Index</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for titulo, datos in revistas.items() %}
+        <tr>
+            <td><a href="/revista/{{ titulo }}">{{ titulo }}</a></td>
+            <td>{{ datos.areas | join(', ') }}</td>
+            <td>{{ datos.catalogos | join(', ') }}</td>
+            <td>{{ datos['H-Index'] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
