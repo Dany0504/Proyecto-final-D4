@@ -1,58 +1,70 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-unison">{{ titulo }}</h2>
-        <span class="badge bg-unison">{{ revistas|length }} revistas</span>
-    </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-unison">{{ titulo }}</h2>
+    <span class="badge bg-unison">{{ revistas|length }} revistas</span>
+  </div>
 
-    {% if revistas %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Título</th>
-                    <th>Áreas</th>
-                    <th>Catálogos</th>
-                    <th>H-Index</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for titulo, datos in revistas.items() %}
-                <tr>
-                    <td>{{ titulo }}</td>
-                    <td>
-                        {% for area in datos.get('areas', []) %}
-                        <a href="{{ url_for('revistas_por_area', nombre=area) }}" class="badge bg-secondary">
-                            {{ area }}
-                        </a>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for catalogo in datos.get('catalogos', []) %}
-                        <span class="badge bg-info text-dark">{{ catalogo }}</span>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {{ datos.get('scimago_data', {}).get('h_index', 'N/A') }}
-                    </td>
-                    <td>
-                        <a href="{{ url_for('detalle_revista', titulo=titulo) }}" 
-                           class="btn btn-sm btn-unison">
-                            Detalles
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div class="alert alert-warning">
-        No se encontraron revistas con estos criterios.
-    </div>
-    {% endif %}
+  {% if revistas %}
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>Título</th>
+          <th>Áreas</th>
+          <th>Catálogos</th>
+          <th>H-Index</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for key, datos in revistas.items() %}
+        <tr>
+          <td>
+            <a href="{{ url_for('detalle_revista', key=key) }}">
+              {{ datos.titulo }}
+            </a>
+          </td>
+          <td>
+            {% if datos.areas %} {% for area in datos.areas %}
+            <a
+              href="{{ url_for('revistas_por_area', nombre=area) }}"
+              class="badge bg-secondary"
+            >
+              {{ area }}
+            </a>
+            {% if not loop.last %}, {% endif %} {% endfor %} {% else %} N/A {%
+            endif %}
+          </td>
+          <td>
+            {% if datos.catalogos %} {% for catalogo in datos.catalogos %}
+            <a
+              href="{{ url_for('revistas_por_catalogo', nombre=catalogo) }}"
+              class="badge bg-info text-dark"
+            >
+              {{ catalogo }}
+            </a>
+            {% if not loop.last %}, {% endif %} {% endfor %} {% else %} N/A {%
+            endif %}
+          </td>
+          <td>{{ datos.h_index or 'N/A' }}</td>
+          <td>
+            <a
+              href="{{ url_for('detalle_revista', key=key) }}"
+              class="btn btn-sm btn-unison"
+            >
+              Detalles
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-warning">
+    No se encontraron revistas con estos criterios.
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

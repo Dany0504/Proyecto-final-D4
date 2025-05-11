@@ -1,30 +1,44 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="container mt-5 text-center">
-    <img src="{{ url_for('static', filename='logo_unison.png') }}" alt="Logo UNISON" width="150" class="mb-3">
-    <h1 class="text-unison">Catálogo de Revistas Académicas</h1>
-    <p class="lead">Explora revistas por área, catálogo o realiza una búsqueda directa por título.</p>
+  <img
+    src="{{ url_for('static', filename='logo_unison.png') }}"
+    alt="Logo UNISON"
+    width="150"
+    class="mb-3"
+  />
+  <h1 class="text-unison">Catálogo de Revistas Académicas</h1>
+  <p class="lead">
+    Explora revistas por área, catálogo o realiza una búsqueda directa por
+    título.
+  </p>
 
-    <form action="{{ url_for('busqueda') }}" method="GET" class="mt-4">
-        <div class="input-group input-group-lg w-75 mx-auto">
-            <input type="text" name="q" class="form-control" placeholder="Buscar una revista por título..." required>
-            <button class="btn btn-danger" type="submit">Buscar</button>
-        </div>
-    </form>
-
+  <form action="{{ url_for('busqueda') }}" method="GET" class="mt-4">
+    <div class="input-group input-group-lg w-75 mx-auto">
+      <input
+        type="text"
+        name="q"
+        class="form-control"
+        placeholder="Buscar una revista por título..."
+        required
+      />
+      <button class="btn btn-danger" type="submit">Buscar</button>
+    </div>
+  </form>
 </div>
 <footer class="bg-light text-center text-muted py-4 mt-5 border-top">
-    <div class="container">
-        <p class="mb-1">
-            <strong>Proyecto Final - Desarrollo de Software</strong>
-        </p>
-        <p class="mb-0">
-            Este sitio web permite explorar un catálogo de revistas científicas clasificadas por área y catálogo, 
-            enriquecido con datos obtenidos desde <a href="https://www.scimagojr.com" target="_blank">SCImago Journal & Country Rank</a>.
-            Desarrollado como parte del curso de programación con Flask y Bootstrap en la Universidad de Sonora.
-        </p>
-    </div>
+  <div class="container">
+    <p class="mb-1">
+      <strong>Proyecto Final - Desarrollo de Software</strong>
+    </p>
+    <p class="mb-0">
+      Este sitio web permite explorar un catálogo de revistas científicas
+      clasificadas por área y catálogo, enriquecido con datos obtenidos desde
+      <a href="https://www.scimagojr.com" target="_blank"
+        >SCImago Journal & Country Rank</a
+      >. Desarrollado como parte del curso de programación con Flask y Bootstrap
+      en la Universidad de Sonora.
+    </p>
+  </div>
 </footer>
 
 {% endblock %}

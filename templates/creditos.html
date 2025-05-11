@@ -1,27 +1,44 @@
-    {% extends 'base.html' %}
-    {% block title %}Créditos{% endblock %}
-    {% block content %}
-    <h2>Créditos</h2>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Foto</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Carlos Eduardo Fierros Sesma</td>
-                <td><img src="{{ url_for('static', filename='foto1.jpg') }}" alt="Foto 1" width="100"></td>
-            </tr>
-            <tr>
-                <td>Diego Alonso Flores Lucero</td>
-                <td><img src="{{ url_for('static', filename='foto2.jpg') }}" alt="Foto 2" width="100"></td>
-            </tr>
-            <tr>
-                <td>Daniel Montaño De la Torre</td>
-                <td><img src="{{ url_for('static', filename='foto3.jpg') }}" alt="Foto 2" width="100"></td>
-            </tr>
-        </tbody>
-    </table>
-    {% endblock %}
+{% extends 'base.html' %} {% block title %}Créditos{% endblock %} {% block
+content %}
+<h2>Créditos</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Foto</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Carlos Eduardo Fierros Sesma</td>
+      <td>
+        <img
+          src="{{ url_for('static', filename='foto1.jpg') }}"
+          alt="Foto 1"
+          width="100"
+        />
+      </td>
+    </tr>
+    <tr>
+      <td>Diego Alonso Flores Lucero</td>
+      <td>
+        <img
+          src="{{ url_for('static', filename='foto2.jpg') }}"
+          alt="Foto 2"
+          width="100"
+        />
+      </td>
+    </tr>
+    <tr>
+      <td>Daniel Montaño De la Torre</td>
+      <td>
+        <img
+          src="{{ url_for('static', filename='foto3.jpg') }}"
+          alt="Foto 2"
+          width="100"
+        />
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
