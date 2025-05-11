@@ -4,6 +4,11 @@ from bs4 import BeautifulSoup
 import time
 import argparse
 import os
+from unidecode import unidecode
+
+# Normalizar texto
+def normalizar(texto):
+    return unidecode(texto.lower().strip())
 
 # obtener datos de la revista desde SCIMAGO
 def obtener_info_scimago(titulo):
@@ -12,93 +17,118 @@ def obtener_info_scimago(titulo):
     response = requests.get(url)
 
     if response.status_code != 200:
-        return {"titulo": titulo, "url": "No encontrado", "h_index": "No disponible"}
+        return info_no_encontrada(titulo)
 
     soup = BeautifulSoup(response.text, "html.parser")
-    enlace = soup.find("a", href=True, string="View journal")
+    enlaces = soup.find_all("a", href=True, string="View journal")
 
-    if enlace is None:
-        return {"titulo": titulo, "url": "No encontrado", "h_index": "No disponible"}
+    if not enlaces:
+        return info_no_encontrada(titulo)
 
-    journal_url = "https://www.scimagojr.com/" + enlace['href']
-    journal_response = requests.get(journal_url)
+    # Verificar coincidencia exacta
+    for enlace in enlaces:
+        journal_url = "https://www.scimagojr.com/" + enlace['href']
+        journal_response = requests.get(journal_url)
 
-    if journal_response.status_code != 200:
-        return {"titulo": titulo, "url": journal_url, "h_index": "No disponible"}
+        if journal_response.status_code != 200:
+            continue
 
-    journal_soup = BeautifulSoup(journal_response.text, "html.parser")
+        journal_soup = BeautifulSoup(journal_response.text, "html.parser")
+        titulo_encontrado = journal_soup.find("h1")
+        if titulo_encontrado and normalizar(titulo_encontrado.text) == normalizar(titulo):
+            return extraer_info(journal_soup, titulo, journal_url, True)
 
-    def extraer_info_por_label(label):
+    # Si no hay coincidencia exacta, devolver el primero igual
+    primer_url = "https://www.scimagojr.com/" + enlaces[0]['href']
+    primer_response = requests.get(primer_url)
+    if primer_response.status_code == 200:
+        primer_soup = BeautifulSoup(primer_response.text, "html.parser")
+        return extraer_info(primer_soup, titulo, primer_url, False)
+
+    return info_no_encontrada(titulo)
+
+def extraer_info(soup, titulo, url, match):
+    def por_label(label):
         try:
-            elemento = journal_soup.find("span", string=label)
-            if elemento:
-                return elemento.find_next("span").text.strip()
+            tag = soup.find("span", string=label)
+            if tag:
+                return tag.find_next("span").text.strip()
         except:
             pass
         return "No disponible"
 
-    def extraer_lista_por_label(label):
+    def lista_por_label(label):
         try:
-            seccion = journal_soup.find("div", class_="cell", string=label)
+            seccion = soup.find("div", class_="cell", string=label)
             if seccion:
-                return [item.text.strip() for item in seccion.find_next_sibling("div").find_all("a")]
+                return [a.text.strip() for a in seccion.find_next_sibling("div").find_all("a")]
         except:
             pass
         return []
 
     return {
         "titulo": titulo,
-        "url": journal_url,
-        "h_index": extraer_info_por_label("H index"),
-        "publisher": extraer_info_por_label("Publisher"),
-        "issn": extraer_info_por_label("ISSN"),
-        "subject_areas": extraer_lista_por_label("Subject Area and Category"),
-        "publication_type": extraer_info_por_label("Type"),
-        "homepage": extraer_info_por_label("Homepage"),
-        "widget": f"<iframe src='https://www.scimagojr.com/journalsearch.php?q={query}' width='100%' height='300'></iframe>"
+        "url": url,
+        "h_index": por_label("H index"),
+        "publisher": por_label("Publisher"),
+        "issn": por_label("ISSN"),
+        "subject_areas": lista_por_label("Subject Area and Category"),
+        "publication_type": por_label("Type"),
+        "homepage": por_label("Homepage"),
+        "widget": f"<iframe src='https://www.scimagojr.com/journalsearch.php?q={'+'.join(titulo.split())}' width='100%' height='300'></iframe>",
+        "coincidencia_exacta": match
+    }
+
+def info_no_encontrada(titulo):
+    return {
+        "titulo": titulo,
+        "url": "No encontrado",
+        "h_index": "No disponible",
+        "publisher": "No disponible",
+        "issn": "No disponible",
+        "subject_areas": "No disponible",
+        "publication_type": "No disponible",
+        "homepage": "No disponible",
+        "widget": "No disponible",
+        "coincidencia_exacta": False
     }
 
 # Función principal
 def ejecutar_scraping():
-    parser = argparse.ArgumentParser(description="Realiza scraping de SCIMAGO por un rango de revistas")
-    parser.add_argument("-a", "--archivo", required=True, help="Archivo JSON con los títulos de revistas")
-    parser.add_argument("-p", "--primero", type=int, required=True, help="Índice inicial de las revistas a procesar")
-    parser.add_argument("-u", "--ultimo", type=int, required=True, help="Índice final de las revistas a procesar")
-    parser.add_argument("-o", "--output", required=True, help="Archivo de salida para los resultados del scraping")
+    parser = argparse.ArgumentParser(description="Scraping de SCIMAGO por rango de revistas")
+    parser.add_argument("-a", "--archivo", required=True, help="Archivo JSON con títulos de revistas")
+    parser.add_argument("-p", "--primero", type=int, required=True, help="Índice inicial")
+    parser.add_argument("-u", "--ultimo", type=int, required=True, help="Índice final")
+    parser.add_argument("-o", "--output", required=True, help="Archivo JSON de salida")
     args = parser.parse_args()
 
-    # Cargar el archivo JSON con los títulos de revistas
     with open(args.archivo, encoding="latin-1") as archivo:
         revistas = json.load(archivo)
 
-    titulos_seleccionados = list(revistas.keys())[args.primero:args.ultimo]
-
-    # Verificar si hay resultados anteriores para evitar duplicados
-    resultados_scraping = []
-    titulos_existentes = set()
+    titulos = list(revistas.keys())[args.primero:args.ultimo]
+    resultados = []
+    ya_procesadas = set()
 
     if os.path.exists(args.output):
         with open(args.output, "r", encoding="utf-8") as f:
-            resultados_scraping = json.load(f)
-            titulos_existentes = {r["titulo"].lower() for r in resultados_scraping}
+            resultados = json.load(f)
+            ya_procesadas = {r["titulo"].lower() for r in resultados}
 
-    # Scraping evitando duplicados
-    for index, titulo in enumerate(titulos_seleccionados, start=args.primero):
-        if titulo.lower() in titulos_existentes:
-            print(f"[{index}] {titulo} ya fue procesado. Saltando...")
+    for i, titulo in enumerate(titulos, start=args.primero):
+        if titulo.lower() in ya_procesadas:
+            print(f"[{i}] {titulo} ya procesado. Saltando...")
             continue
 
-        print(f"Procesando [{index}] {titulo}...")
-        datos_revista = obtener_info_scimago(titulo)
-        resultados_scraping.append(datos_revista)
-        time.sleep(1)  # Esperar 1 segundo entre solicitudes
+        print(f"[{i}] Procesando: {titulo}")
+        info = obtener_info_scimago(titulo)
+        resultados.append(info)
+        time.sleep(1)
 
-    # Guardar los resultados en un archivo JSON
-    with open(args.output, "w", encoding="utf-8") as salida:
-        json.dump(resultados_scraping, salida, indent=4, ensure_ascii=False)
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(resultados, f, indent=4, ensure_ascii=False)
 
-    print(f"Se generó el archivo {args.output} con {len(resultados_scraping)} registros.")
+    print(f"✅ {len(resultados)} registros guardados en {args.output}")
 
-# Ejecutar si se corre directamente
+# Ejecutar
 if __name__ == "__main__":
     ejecutar_scraping()
