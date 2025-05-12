@@ -1,17 +1,36 @@
-Diego Alonso Flores Lucero,
-Carlos Eduardo Fierros Sesma,
-Daniel Montaño de la Torre.
+#  Explorador de Revistas Académicas – Universidad de Sonora
+Este proyecto tiene como objetivo la exploración y visualización de revistas académicas a través de una aplicación web construida con Python, Flask y Bootstrap, usando como fuente de información archivos CSV proporcionados y datos obtenidos del sitio SCImago Journal & Country Rank.
 
-Este proyecto en python se basa en una aplicacion web en la cual puedes buscar revistas academicas mediante nombre, area o catalogo.
-para que el programa funcione es necesario instalar flask, puedes intentar escribiendo esto en la terminal de vscode. 
+##  Integrantes del equipo
+Carlos Eduardo Fierros Sesma 
 
-pip install flask
+Diego Alonso Flores Lucero 
 
-una vez instalado basta con ejecutar el archivo app.py y abrir el servidor local
+Daniel Montaño de la Torre
 
-para este proyecto ultilizamos un asistente digital (copilot y chatGPT) para terminar algunos bloques de codigo, resolver unos errores
-especificos y a hacer un trabajo mas presentable, esto nos ayudo a lograr terminar el proyecto con un flujo eficiente y rapido, 
-y asegurar un desarrollo estructurado y funcional
+
+##  Instrucciones de Uso
+**#1- Instalación de Flask**
+
+Para que la aplicación funcione correctamente, es necesario instalar el framework Flask. Para ello, abre una terminal en Visual Studio Code (u otro entorno de tu preferencia) y ejecuta el siguiente comando:
+
+*pip install flask*
+
+**2- Ejecución del servidor**
+
+Una vez que Flask esté instalado, simplemente ejecuta el archivo app.py para levantar el servidor local. Puedes hacerlo con el siguiente comando:
+
+*python app.py*
+
+**3- Acceso a la aplicacion**
+
+Después de ejecutar app.py, abre tu navegador web y visita la siguiente dirección para acceder a la aplicación:
+
+http://127.0.0.1:5000/ 
+
+## Tecnologias Utilizadas
+Para este proyecto utilizamos asistentes digitales como GitHub Copilot y ChatGPT para completar algunos bloques de código, resolver errores específicos y mejorar la presentación general del trabajo. Estas herramientas nos ayudaron a mantener un flujo de desarrollo eficiente y rápido, permitiéndonos estructurar el proyecto de forma funcional y organizada.
+
 
 
 
