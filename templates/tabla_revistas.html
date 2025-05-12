@@ -1,13 +1,18 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <div class="container">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-unison">{{ titulo }}</h2>
     <span class="badge bg-unison">{{ revistas|length }} revistas</span>
   </div>
 
+  <div class="mb-3">
+    <input type="text" id="busqueda-revistas" class="form-control" placeholder="Buscar revista...">
+  </div>
+
   {% if revistas %}
   <div class="table-responsive">
-    <table class="table table-hover">
+    <table class="table table-hover" id="tabla-revistas">
       <thead class="table-dark">
         <tr>
           <th>Título</th>
@@ -26,33 +31,30 @@
             </a>
           </td>
           <td>
-            {% if datos.areas %} {% for area in datos.areas %}
-            <a
-              href="{{ url_for('revistas_por_area', nombre=area) }}"
-              class="badge bg-secondary"
-            >
-              {{ area }}
-            </a>
-            {% if not loop.last %}, {% endif %} {% endfor %} {% else %} N/A {%
-            endif %}
+            {% if datos.areas %}
+              {% for area in datos.areas %}
+                <a href="{{ url_for('revistas_por_area', nombre=area) }}" class="badge bg-secondary">
+                  {{ area }}
+                </a>
+              {% endfor %}
+            {% else %}
+              N/A
+            {% endif %}
           </td>
           <td>
-            {% if datos.catalogos %} {% for catalogo in datos.catalogos %}
-            <a
-              href="{{ url_for('revistas_por_catalogo', nombre=catalogo) }}"
-              class="badge bg-info text-dark"
-            >
-              {{ catalogo }}
-            </a>
-            {% if not loop.last %}, {% endif %} {% endfor %} {% else %} N/A {%
-            endif %}
+            {% if datos.catalogos %}
+              {% for catalogo in datos.catalogos %}
+                <a href="{{ url_for('revistas_por_catalogo', nombre=catalogo) }}" class="badge bg-info text-dark">
+                  {{ catalogo }}
+                </a>
+              {% endfor %}
+            {% else %}
+              N/A
+            {% endif %}
           </td>
           <td>{{ datos.h_index or 'N/A' }}</td>
           <td>
-            <a
-              href="{{ url_for('detalle_revista', key=key) }}"
-              class="btn btn-sm btn-unison"
-            >
+            <a href="{{ url_for('detalle_revista', key=key) }}" class="btn btn-sm btn-unison">
               Detalles
             </a>
           </td>
@@ -67,4 +69,16 @@
   </div>
   {% endif %}
 </div>
+
+<script>
+  document.getElementById("busqueda-revistas").addEventListener("input", function () {
+    const filtro = this.value.toLowerCase();
+    const filas = document.querySelectorAll("#tabla-revistas tbody tr");
+
+    filas.forEach(fila => {
+      const texto = fila.textContent.toLowerCase();
+      fila.style.display = texto.includes(filtro) ? "" : "none";
+    });
+  });
+</script>
 {% endblock %}
