@@ -1,6 +1,6 @@
-DIEGO ALONSO FLORES LUCERO
-CARLOS EDUARDO FIERROS SESMA
-DANIEL MONTAÑO DE LA TORRE
+Diego Alonso Flores Lucero,
+Carlos Eduardo Fierros Sesma,
+Daniel Montaño de la Torre.
 
 Este proyecto en python se basa en una aplicacion web en la cual puedes buscar revistas academicas mediante nombre, area o catalogo.
 para que el programa funcione es necesario instalar flask, puedes intentar escribiendo esto en la terminal de vscode. 
